@@ -10,9 +10,12 @@ export default async (socket) => {
     await usersManager.create(data);
     socket.emit("users", await usersManager.read());
   });
-  socket.on("nickname", async (nick) => {
+  socket.on("user", async (user) => {
+    if (messages.length >= 20) {
+      messages.shift();
+    }
     messages.push(
-      `<p class="py-1 px-3"><span class="fw-bolder">${nick}</span> is online</p>`
+      `<p class="py-1"><span class="fw-bolder text-${user.color}">${user.nickname}</span> is online</p>`
     );
     socketServer.emit("messages", messages);
   });

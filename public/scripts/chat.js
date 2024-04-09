@@ -1,6 +1,10 @@
 const socket = io();
 
-let nickname = "";
+const colors = ["success", "danger", "primary", "warning"];
+let user = {
+  nickname: "",
+  color: colors[Math.floor(Math.random() * 4)],
+};
 let allMessages = [];
 
 Swal.fire({
@@ -9,10 +13,12 @@ Swal.fire({
   allowOutsideClick: false,
   inputValidator: (value) => !value && "PLEASE! Write your nickname!",
 }).then((data) => {
-  nickname = data.value;
+  user.nickname = data.value;
   //console.log(nickname);
-  document.querySelector("#nickname").innerHTML = nickname;
-  socket.emit("nickname", nickname);
+  document.querySelector(
+    "#nickname"
+  ).innerHTML = `<span class="py-1 fw-bolder text-${user.color}">${user.nickname}</span>`;
+  socket.emit("user", user);
 });
 
 socket.on("messages", (messages) => {
@@ -24,7 +30,10 @@ socket.on("messages", (messages) => {
 
 document.querySelector("#message").addEventListener("keyup", (event) => {
   if (event.key == "Enter") {
-    const message = `<p class="py-1 px-3"><span class="fw-bolder">${nickname}:</span> ${event.target.value}</p>`;
+    const message = `<p class="py-1"><span class="fw-bolder text-${user.color}">${user.nickname}:</span> ${event.target.value}</p>`;
+    if (allMessages.length >= 10) {
+      allMessages.shift();
+    }
     allMessages.push(message);
     socket.emit("all messages", allMessages);
     event.target.value = "";
